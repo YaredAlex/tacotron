@@ -6,7 +6,6 @@ import subprocess
 import time
 import tensorflow as tf
 import traceback
-
 from datasets.datafeeder import DataFeeder
 from hparams import hparams, hparams_debug_string
 from models import create_model
@@ -15,11 +14,11 @@ from util import audio, infolog, plot, ValueWindow
 log = infolog.log
 
 
-def get_git_commit():
-  subprocess.check_output(['git', 'diff-index', '--quiet', 'HEAD'])   # Verify client is clean
-  commit = subprocess.check_output(['git', 'rev-parse', 'HEAD']).decode().strip()[:10]
-  log('Git commit: %s' % commit)
-  return commit
+# def get_git_commit():
+#   subprocess.check_output(['git', 'diff-index', '--quiet', 'HEAD'])   # Verify client is clean
+#   commit = subprocess.check_output(['git', 'rev-parse', 'HEAD']).decode().strip()[:10]
+#   log('Git commit: %s' % commit)
+#   return commit
 
 
 def add_stats(model):
@@ -43,7 +42,8 @@ def time_string():
 
 
 def train(log_dir, args):
-  commit = get_git_commit() if args.git else 'None'
+  # commit = get_git_commit() if args.git else 'None'
+  commit = "Tacotron"
   checkpoint_path = os.path.join(log_dir, 'model.ckpt')
   input_path = os.path.join(args.base_dir, args.input)
   log('Checkpoint path: %s' % checkpoint_path)
@@ -81,9 +81,9 @@ def train(log_dir, args):
         # Restore from a checkpoint if the user requested it.
         restore_path = '%s-%d' % (checkpoint_path, args.restore_step)
         saver.restore(sess, restore_path)
-        log('Resuming from checkpoint: %s at commit: %s' % (restore_path, commit), slack=True)
+        log('Resuming from checkpoint: %s  %s' % (restore_path, commit), slack=True)
       else:
-        log('Starting new training run at commit: %s' % commit, slack=True)
+        log('Starting new training run  %s' % commit, slack=True)
 
       feeder.start_in_session(sess)
 
@@ -124,20 +124,20 @@ def train(log_dir, args):
 
 def main():
   parser = argparse.ArgumentParser()
-  parser.add_argument('--base_dir', default=os.path.expanduser('~/tacotron'))
+  parser.add_argument('--base_dir', default='D:\\MinorProject_IV\\tacotron')
   parser.add_argument('--input', default='training/train.txt')
   parser.add_argument('--model', default='tacotron')
-  parser.add_argument('--name', help='Name of the run. Used for logging. Defaults to model name.')
+  parser.add_argument('--name', help='Emotional TTS-Tacotron')
   parser.add_argument('--hparams', default='',
     help='Hyperparameter overrides as a comma-separated list of name=value pairs')
   parser.add_argument('--restore_step', type=int, help='Global step to restore from checkpoint.')
   parser.add_argument('--summary_interval', type=int, default=100,
     help='Steps between running summary ops.')
-  parser.add_argument('--checkpoint_interval', type=int, default=1000,
+  parser.add_argument('--checkpoint_interval', type=int, default=100,
     help='Steps between writing checkpoints.')
   parser.add_argument('--slack_url', help='Slack webhook URL to get periodic reports.')
   parser.add_argument('--tf_log_level', type=int, default=1, help='Tensorflow C++ log level.')
-  parser.add_argument('--git', action='store_true', help='If set, verify that the client is clean.')
+  # parser.add_argument('--git', action='store_true', help='If set, verify that the client is clean.')
   args = parser.parse_args()
   os.environ['TF_CPP_MIN_LOG_LEVEL'] = str(args.tf_log_level)
   run_name = args.name or args.model

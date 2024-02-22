@@ -1,0 +1,10 @@
+#demo-server
+python demo_server.py --checkpoint tacotron-20180906/model.ckpt
+##
+tensorboard --logdir D:\MinorProject_IV\tacotron\logs-tacotron
+#preprocess data
+python preprocess.py --dataset ljspeech
+#training
+python train.py
+
+D:\MinorProject_IV\tacotron\parallel_tacotron.png

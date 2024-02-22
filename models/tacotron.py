@@ -12,13 +12,9 @@ from .rnn_wrappers import DecoderPrenetWrapper, ConcatOutputAndAttentionWrapper
 class Tacotron():
   def __init__(self, hparams):
     self._hparams = hparams
-
-
   def initialize(self, inputs, input_lengths, mel_targets=None, linear_targets=None):
     '''Initializes the model for inference.
-
     Sets "mel_outputs", "linear_outputs", and "alignments" fields.
-
     Args:
       inputs: int32 Tensor with shape [N, T_in] where N is batch size, T_in is number of
         steps in the input time series, and values are character IDs
@@ -46,20 +42,16 @@ class Tacotron():
       prenet_outputs = prenet(embedded_inputs, is_training, hp.prenet_depths)    # [N, T_in, prenet_depths[-1]=128]
       encoder_outputs = encoder_cbhg(prenet_outputs, input_lengths, is_training, # [N, T_in, encoder_depth=256]
                                      hp.encoder_depth)
-
       # Attention
       attention_cell = AttentionWrapper(
         GRUCell(hp.attention_depth),
         BahdanauAttention(hp.attention_depth, encoder_outputs),
         alignment_history=True,
         output_attention=False)                                                  # [N, T_in, attention_depth=256]
-      
       # Apply prenet before concatenation in AttentionWrapper.
       attention_cell = DecoderPrenetWrapper(attention_cell, is_training, hp.prenet_depths)
-
       # Concatenate attention context vector and RNN cell output into a 2*attention_depth=512D vector.
       concat_cell = ConcatOutputAndAttentionWrapper(attention_cell)              # [N, T_in, 2*attention_depth=512]
-
       # Decoder (layers specified bottom to top):
       decoder_cell = MultiRNNCell([
           OutputProjectionWrapper(concat_cell, hp.decoder_depth),
